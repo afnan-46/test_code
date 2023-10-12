@@ -1,0 +1,148 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.List;
+
+public class QuizPage {
+    public JFrame frame;
+    public JPanel qusPanel;
+    public JLabel qus;
+    public JCheckBox option1;
+    public JCheckBox option2;
+    public JCheckBox option3;
+    public int correctCount;
+    public int falseCount;
+
+    public QuizPage() {
+        frame = new JFrame();
+        qusPanel = new JPanel();
+        correctCount = 0;
+        falseCount = 0;
+
+        // Create questions
+        List<Question> questions = new ArrayList<>();
+
+        // Question 1
+        Question question1 = new Question("1) How are you?",
+                "Fine", "Tired", "Been doing great", 1);
+        questions.add(question1);
+
+        // Question 2
+        Question question2 = new Question("2) Are you ok to give up?",
+                "No", "What can I do", "I don't care", 1);
+        questions.add(question2);
+
+        // Question 3
+        Question question3 = new Question("3) Are you going to repeat the mistake?",
+                "Yes", "What can I do", "No", 3);
+        questions.add(question3);
+
+        // Set initial question
+        setCurrentQuestion(questions.get(0));
+    }
+
+    private void setCurrentQuestion(Question question) {
+        createQuestionPanel();
+        createButtons();
+        addQuestion(question.getQuestionText());
+        addOptions(question.getOption1(), question.getOption2(), question.getOption3());
+
+        // Update scoring based on selected answer when moving to the next question
+        addButtons(e -> {
+            updateScore(question);
+            int currentQuestionIndex = questions.indexOf(question);
+            if (currentQuestionIndex < questions.size() - 1) {
+                setCurrentQuestion(questions.get(currentQuestionIndex + 1));
+            } else {
+                showScore();
+            }
+        }, e -> {
+            updateScore(question);
+            int currentQuestionIndex = questions.indexOf(question);
+            if (currentQuestionIndex > 0) {
+                setCurrentQuestion(questions.get(currentQuestionIndex - 1));
+            }
+        });
+
+        frame.add(qusPanel);
+        frame.setVisible(true);
+    }
+
+    private void showScore() {
+        createQuestionPanel();
+        createButtons();
+        addQuestion("Quiz completed. Your score: " + correctCount + "/" + questions.size());
+
+        JButton finishButton = new JButton("Finish");
+        finishButton.addActionListener(e -> {
+            new ResultPage(correctCount, falseCount);
+            frame.dispose();
+        });
+
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.add(finishButton);
+        qusPanel.add(buttonPanel, BorderLayout.SOUTH);
+
+        frame.add(qusPanel);
+        frame.setVisible(true);
+    }
+
+    private void createQuestionPanel() {
+        frame.setSize(800, 500);
+        frame.getContentPane().removeAll();
+        qusPanel.removeAll();
+        qusPanel.setLayout(new BorderLayout());
+        qusPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+    }
+
+    private void createButtons() {
+        JPanel buttonPanel = new JPanel();
+        JButton nextButton = new JButton("Next");
+        JButton prevButton = new JButton("Prev");
+        buttonPanel.add(nextButton);
+        buttonPanel.add(prevButton);
+        qusPanel.add(buttonPanel, BorderLayout.SOUTH);
+    }
+
+    private void addQuestion(String question) {
+        qus = new JLabel(question);
+        qusPanel.add(qus, BorderLayout.NORTH);
+    }
+
+    private void addOptions(String option1Text, String option2Text, String option3Text) {
+        JPanel optionPanel = new JPanel();
+        optionPanel.setLayout(new GridLayout(3, 1));
+        option1 = new JCheckBox(option1Text);
+        option2 = new JCheckBox(option2Text);
+        option3 = new JCheckBox(option3Text);
+        optionPanel.add(option1);
+        optionPanel.add(option2);
+        optionPanel.add(option3);
+        qusPanel.add(optionPanel, BorderLayout.CENTER);
+    }
+
+    private void addButtons(ActionListener nextButtonAction, ActionListener prevButtonAction) {
+        JPanel buttonPanel = new JPanel();
+        JButton nextButton = new JButton("Next");
+        JButton prevButton = new JButton("Prev");
+        nextButton.addActionListener(nextButtonAction);
+        prevButton.addActionListener(prevButtonAction);
+        buttonPanel.add(nextButton);
+        buttonPanel.add(prevButton);
+        qusPanel.add(buttonPanel, BorderLayout.SOUTH);
+    }
+
+    private void updateScore(Question question) {
+        if (option1.isSelected() && question.getCorrectAnswer() == 1) {
+            correctCount++;
+        } else if (option2.isSelected() && question.getCorrectAnswer() == 2) {
+            correctCount++;
+        } else if (option3.isSelected() && question.getCorrectAnswer() == 3) {
+            correctCount++;
+        } else {
+            falseCount++;
+        }
+    }
+}

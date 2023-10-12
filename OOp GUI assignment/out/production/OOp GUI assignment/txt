@@ -1,0 +1,161 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.List;
+
+public class QuizPage {
+    public static void main(String[] args) {
+        new QuizPage();
+    }
+
+    public QuizPage() {
+        JFrame frame = new JFrame();
+        JPanel qusPanel = new JPanel();
+        int correctCount = 0;
+        int falseCount = 0;
+        int currentQuestionIndex = 0;
+
+        List<Question> questions = new ArrayList<>();
+        initializeQuestions(questions);
+
+        showQuestion(frame, qusPanel, correctCount, falseCount, currentQuestionIndex, questions);
+    }
+
+    private void initializeQuestions(List<Question> questions) {
+        questions.add(new Question(
+                "How are you?",
+                new String[]{"Fine", "Tired", "Been doing great"},
+                new int[]{0}
+        ));
+
+        questions.add(new Question(
+                "Are you ok to give up?",
+                new String[]{"No", "What can I do", "I don't care"},
+                new int[]{0}
+        ));
+
+        questions.add(new Question(
+                "Are you going to repeat the mistake?",
+                new String[]{"Yes", "What can I do", "No"},
+                new int[]{2}
+        ));
+
+        questions.add(new Question(
+                "Are you demoted?",
+                new String[]{"Yes", "I am not sure", "No"},
+                new int[]{2}
+        ));
+
+        questions.add(new Question(
+                "Are you male or female?",
+                new String[]{"Male", "Female", "3rd gender"},
+                new int[]{0, 1}
+        ));
+    }
+
+    private void showQuestion(JFrame frame, JPanel qusPanel, int correctCount, int falseCount,
+                              int currentQuestionIndex, List<Question> questions) {
+        createQuestionPanel(frame, qusPanel);
+        createButtons(frame, qusPanel);
+
+        Question question = questions.get(currentQuestionIndex);
+        addQuestion(qusPanel, (currentQuestionIndex + 1) + ") " + question.getText());
+        addOptions(qusPanel, question.getOptions());
+
+        addButtons(frame, qusPanel, e -> {
+            evaluateAnswers(question.getCorrectOptions(), correctCount, falseCount);
+            if (currentQuestionIndex < questions.size() - 1) {
+                currentQuestionIndex++;
+                showQuestion(frame, qusPanel, correctCount, falseCount, currentQuestionIndex, questions);
+            } else {
+                showResultPage(correctCount, falseCount);
+                frame.setVisible(false);
+            }
+        }, e -> {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                showQuestion(frame, qusPanel, correctCount, falseCount, currentQuestionIndex, questions);
+            }
+        });
+
+        frame.add(qusPanel);
+        frame.setSize(800, 500);
+        frame.setVisible(true);
+    }
+
+    private void createQuestionPanel(JFrame frame, JPanel qusPanel) {
+        frame.getContentPane().removeAll();
+        qusPanel.removeAll();
+        qusPanel.setLayout(new BorderLayout());
+        qusPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+    }
+
+    private void createButtons(JFrame frame, JPanel qusPanel) {
+        JPanel buttonPanel = new JPanel();
+        JButton nextButton = new JButton("Next");
+        JButton prevButton = new JButton("Prev");
+        buttonPanel.add(nextButton);
+        buttonPanel.add(prevButton);
+        qusPanel.add(buttonPanel, BorderLayout.SOUTH);
+    }
+
+    private void addQuestion(JPanel qusPanel, String question) {
+        JLabel qus = new JLabel(question);
+        qusPanel.add(qus, BorderLayout.NORTH);
+    }
+
+    private void addOptions(JPanel qusPanel, String[] optionTexts) {
+        JPanel optionPanel = new JPanel();
+        optionPanel.setLayout(new GridLayout(optionTexts.length, 1));
+        JCheckBox[] options = new JCheckBox[optionTexts.length];
+        for (int i = 0; i < optionTexts.length; i++) {
+            options[i] = new JCheckBox(optionTexts[i]);
+            optionPanel.add(options[i]);
+        }
+        qusPanel.add(optionPanel, BorderLayout.CENTER);
+    }
+
+    private void addButtons(JFrame frame, JPanel qusPanel, ActionListener nextButtonAction, ActionListener prevButtonAction) {
+        JPanel buttonPanel = new JPanel();
+        JButton nextButton = new JButton("Next");
+        JButton prevButton = new JButton("Prev");
+        nextButton.addActionListener(nextButtonAction);
+        prevButton.addActionListener(prevButtonAction);
+        buttonPanel.add(nextButton);
+        buttonPanel.add(prevButton);
+        qusPanel.add(buttonPanel, BorderLayout.SOUTH);
+    }
+
+    private void evaluateAnswers(int[] correctOptions, int correctCount, int falseCount) {
+        // Implementation of answer evaluation
+    }
+
+    private void showResultPage(int correctCount, int falseCount) {
+        // Implementation of showing result page
+    }
+
+    private static class Question {
+        private String text;
+        private String[] options;
+        private int[] correctOptions;
+
+        public Question(String text, String[] options, int[] correctOptions) {
+            this.text = text;
+            this.options = options;
+            this.correctOptions = correctOptions;
+        }
+
+        public String getText() {
+            return text;
+        }
+
+        public String[] getOptions() {
+            return options;
+        }
+
+        public int[] getCorrectOptions() {
+            return correctOptions;
+        }
+    }
+}
